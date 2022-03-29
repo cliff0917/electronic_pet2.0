@@ -1,0 +1,13 @@
+matplotlib==3.4.3
+scipy==1.7.1
+numpy==1.19.5
+pandas==1.3.3
+torch==1.9.1
+tensorflow_gpu==2.5.0
+av==8.1.0
+fvcore==0.1.5.post20220119
+numba==0.55.0
+scikit_learn==1.0.2
+simplejson==3.17.6
+tensorflow==2.7.0
+util==0.0.1
