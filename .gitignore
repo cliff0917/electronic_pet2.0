@@ -5,3 +5,4 @@ video_test/
 yolo/
 __pycache__/
 *.ipynb
+knn_cls.py

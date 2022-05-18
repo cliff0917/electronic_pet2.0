@@ -40,4 +40,3 @@ class Sampling(Layer):
         base_config = super(Sampling, self).get_config()
         config = {'latent_dim': self.latent_dim}
         return dict(list(base_config.items()) + list(config.items()))
-

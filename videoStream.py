@@ -7,10 +7,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics.pairwise import cosine_similarity
 
 import globals
-from detector import *
 
 class VideoStream(ABC):
-
     def __init__(self, video_path, input_file, extension):
         self.video_path = video_path
         self.input_file = input_file
@@ -66,9 +64,11 @@ class VideoStream(ABC):
         self.double_check() # 校正 unseen class
         self.video_reconstruct()    # 校正完做 reconstruct
 
-        # reconstruct 完上傳 unseen file
-        globals.obj_detector.upload_unseen_file()
-        globals.face_detector.upload_unseen_file()
+        # reconstruct 完上傳 unseen file, 用 try 是避免 server 沒開導致 error
+        try:
+            globals.obj_detector.upload_unseen_file()
+            globals.face_detector.upload_unseen_file()
+        except: pass
 
     def double_check(self):
         print('obj:')
@@ -128,7 +128,6 @@ class VideoStream(ABC):
                             bbox_info[-1] = replace_name # 修正 label
                             prob = bbox_info[-3]
                             bbox_info[-2] = 14 * (len(replace_name) + len(str(prob)) + 2) # 修正 background 長度
-
         return detector.reconstruct_repeat
 
     def video_reconstruct(self):
