@@ -5,13 +5,15 @@ warnings.filterwarnings("ignore", category=Warning)
 import os
 import dash
 import webbrowser
+import dash_uploader as du
 from dash import dcc, html, callback
 from dash.dependencies import Input, Output
 
 from components import navBar, menuBar
-from pages import home, non_exist
+from pages import home, detect, non_exist
 
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
+du.configure_upload(app, folder='temp')
 
 # components
 navbar = navBar.navbar
@@ -21,7 +23,6 @@ content = html.Div(id='content')
 
 def serve_layout():
     # 得到最新狀態的 db
-
     layout = html.Div(
         [
             url,
@@ -45,8 +46,8 @@ def display_page(pathname):
     if pathname in ['/', '/Home']:
         return home.serve_layout()
 
-    # elif pathname == '/Detect':
-    #     return discover.serve_layout()
+    elif pathname == '/Detect':
+        return detect.serve_layout()
 
     # elif pathname == '/Transfer':
     #     return security_events.serve_layout()

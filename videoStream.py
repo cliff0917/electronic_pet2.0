@@ -5,6 +5,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics.pairwise import cosine_similarity
+from rq import get_current_job
 
 import globals
 
@@ -36,19 +37,26 @@ class VideoStream(ABC):
             self.fourcc, self.fps, (self.length, self.width))
 
     def run(self):
-        globals.initialize('obj', 'face', self.fps, self.input_file)
+        globals.initialize('obj', 'face', self.fps, self.input_file, self.frame_num)
         globals.bbox_record = [[] for _ in range(int(self.frame_num))]
 
+        job = get_current_job()
+        job.meta["progress"] = 0
+        job.meta["remain_time"] = 0
+        job.save_meta()
+
+        avg_process_time = 0.0
         start = time.time()
-        while (self.cap.isOpened()):
+        while self.cap.isOpened():
             ret, img = self.cap.read()
             if not ret:
                 break
-
             print('-' * 25)
             print(f'frame : {globals.cnt}')
             self.tmp_out.write(globals.obj_detector.detect(img))
             globals.cnt += 1
+            job.meta["progress"] = 100 * globals.cnt / self.frame_num
+            job.save_meta()
         end = time.time()
 
         self.cap.release()

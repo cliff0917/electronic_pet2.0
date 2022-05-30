@@ -29,7 +29,8 @@ class Detector():
     def __init__(self, dataset, fps, input_file, transfer=False, p_learning=False, server_ip='192.168.65.27', server_port=8080):
         self.server_ip = server_ip
         self.server_port = server_port
-        self.download_unseen_file(transfer)
+        self.transfer = transfer
+        self.download_unseen_file()
 
         self.dataset = dataset
         yolo = cv2.dnn.readNet(f'./yolo/yolov4-{dataset}_best.weights',
@@ -70,8 +71,8 @@ class Detector():
             custom_objects = {'Scaler': Scaler, 'Sampling': Sampling}
             self.encoder = load_model(f'./model/{self.dataset}/encoder_ft_{self.attr_type}.h5', custom_objects)
 
-    def download_unseen_file(self, transfer):
-        if transfer == False:
+    def download_unseen_file(self):
+        if self.transfer == False:
             return
 
         print('-' * 25)
@@ -81,6 +82,8 @@ class Detector():
         print('-' * 25)
 
     def upload_unseen_file(self):
+        if self.transfer == False:
+            return
         print('-' * 25)
         self.client = client.Client(self.server_ip, self.server_port, 0)
         self.client.start(self.unseen_file)

@@ -4,5 +4,7 @@ tmp_unseen/
 video_test/
 yolo/
 __pycache__/
+temp/
 *.ipynb
 knn_cls.py
+test_video.py
