@@ -90,6 +90,7 @@ def retrieve_output(n, submitted):
 
             # 工作執行中, 獲得 progress 並更新 progress bar
             progress = job.meta.get("progress", 0)
+            reconstruct = job.meta.get("reconstruct", 0)
 
             # 當進度為0時, 代表還在初始化 detector
             if progress == 0:
@@ -106,14 +107,38 @@ def retrieve_output(n, submitted):
                     isCompleted=dash.no_update,
                 )
 
-            # 當進度不為0時, 更新 progress bar
-            return Result(
-                result=f"處理中 - 已完成 {progress:.2f}%",
-                progress=progress,
-                collapse_is_open=True,
-                finished_data=dash.no_update,
-                isCompleted=dash.no_update,
-            )
+            elif progress == 100:
+                if reconstruct == 0:
+                    return Result(
+                        result=[
+                            f'處理中 - 已完成 {progress:.2f}%, 即將進行 Reconstruct',
+                            dbc.Spinner(size="lg", color="primary",
+                                        spinner_style={'margin-left': '15px', 'width': '40px', 'height': '40px'}
+                            )
+                        ],
+                        progress=0,
+                        collapse_is_open=True,
+                        finished_data=dash.no_update,
+                        isCompleted=dash.no_update,
+                    )
+                else:
+                    return Result(
+                    result=f"Reconstruct 中 - 已完成 {reconstruct:.2f}%",
+                    progress=reconstruct,
+                    collapse_is_open=True,
+                    finished_data=dash.no_update,
+                    isCompleted=dash.no_update,
+                )
+
+            else:
+                # 當進度不為0時, 更新 progress bar
+                return Result(
+                    result=f"處理中 - 已完成 {progress:.2f}%",
+                    progress=progress,
+                    collapse_is_open=True,
+                    finished_data=dash.no_update,
+                    isCompleted=dash.no_update,
+                )
 
         except NoSuchJobError:
             return Result(

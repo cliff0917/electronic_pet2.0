@@ -26,7 +26,7 @@ tf_config.gpu_options.per_process_gpu_memory_fraction = 0.1 # GPU最大使用率
 sess = tf.compat.v1.Session(config=tf_config)
 
 class Detector():
-    def __init__(self, dataset, fps, input_file, transfer=False, p_learning=False, server_ip='192.168.65.27', server_port=8080):
+    def __init__(self, dataset, fps, input_file, transfer=False, p_learning=True, server_ip='140.116.82.36', server_port=8080):
         self.server_ip = server_ip
         self.server_port = server_port
         self.transfer = transfer
@@ -93,8 +93,7 @@ class Detector():
         if self.dataset == 'obj':
             self.original_classNum = 9
             self.classNum = self.original_classNum
-            self.threshold = 0.555  # 0.56
-
+            self.threshold = 0.5  # 0.56, 0.555
         elif self.dataset == 'face':
             self.original_classNum = 5
             self.classNum = self.original_classNum

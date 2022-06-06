@@ -14,8 +14,8 @@ class VideoStream(ABC):
         self.video_path = video_path
         self.input_file = input_file
         self.file_name = input_file.split('.')[0]
-        self.tmp_file = f'{self.file_name}_tmp' # the file before reconstruct
-        self.output_file = f'{self.file_name}_final'    # the file after reconstruct
+        self.tmp_file = f'{self.file_name}_tmp.{extension}' # the file before reconstruct
+        self.output_file = f'{self.file_name}_final.{extension}'    # the file after reconstruct
         self.cap = cv2.VideoCapture(f'{video_path}/{input_file}')
         self.length = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -23,17 +23,16 @@ class VideoStream(ABC):
         self.frame_num = self.cap.get(cv2.CAP_PROP_FRAME_COUNT)
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.alpha = 0.7
-        self.extension = extension
         self.setVideoType()
         self.setOutputType()
 
     def setOutputType(self):
         self.tmp_out = cv2.VideoWriter(
-            f'{self.video_path}/{self.tmp_file}.{self.extension}',
+            f'{self.video_path}/{self.tmp_file}',
             self.fourcc, self.fps, (self.length, self.width))
 
         self.reconstruct_out = cv2.VideoWriter(
-            f'{self.video_path}/{self.tmp_file}.{self.extension}',
+            f'{self.video_path}/{self.output_file}',
             self.fourcc, self.fps, (self.length, self.width))
 
     def run(self):
@@ -42,7 +41,6 @@ class VideoStream(ABC):
 
         job = get_current_job()
         job.meta["progress"] = 0
-        job.meta["remain_time"] = 0
         job.save_meta()
 
         avg_process_time = 0.0
@@ -87,10 +85,9 @@ class VideoStream(ABC):
         print('-' * 25)
 
     def check(self, detector):
+        merge = {} # 存要 rename 的 unseen class 和其對應的 seen class
         f = open(f'{self.video_path}/{self.input_file}_record.txt', 'a')
         f.write('\n')
-        merge = {} # 存要 rename 的 unseen class 和其對應的 seen class
-        delete = []
 
         if detector.threshold >= 0.6:
             threshold = detector.threshold
@@ -115,7 +112,7 @@ class VideoStream(ABC):
                 replace_name = detector.classes[label]
                 detector.classes[i] = detector.classes[label]
                 print(f'*** {unseen_name} 校正成為 {replace_name} ***')
-                f.write(f'\n*** {unseen_name} 校正成為 {replace_name} ***')
+                f.write(f'\n*** {unseen_name} 校正成為 {replace_name} ***\n')
                 merge[unseen_name] = replace_name
                 detector.classes_cnt[label] += detector.classes_cnt[i]
                 detector.reconstruct_repeat[i] = 1
@@ -123,8 +120,6 @@ class VideoStream(ABC):
 
         print(f'classNum: {detector.classNum}')
         print(detector.classes)
-
-        self.cap = cv2.VideoCapture(f'{self.video_path}/{self.input_file}')
 
         # merge 不為空
         if merge:
@@ -139,20 +134,20 @@ class VideoStream(ABC):
         return detector.reconstruct_repeat
 
     def video_reconstruct(self):
-        self.cap = cv2.VideoCapture(f'{self.video_path}/{self.input_file}')
+        self.cap = cv2.VideoCapture(f'{self.video_path}/{self.input_file}') # 重新打開 input file
+        job = get_current_job()
+        job.meta["reconstruct"] = 0
+        job.save_meta()
 
         i = 0
         start = time.time()
-
-        while (self.cap.isOpened()):
+        while self.cap.isOpened():
             ret, img = self.cap.read()
-
             if not ret:
                 break
 
             overlay = img.copy()
             output = img.copy()
-
             for bbox_info in globals.bbox_record[i]:
                 x, y, w, h, color, prob, label_pos, background, label = bbox_info
                 prob = round(prob, 2)
@@ -175,6 +170,8 @@ class VideoStream(ABC):
 
             self.reconstruct_out.write(output)
             i += 1
+            job.meta["reconstruct"] = 100 * i / self.frame_num
+            job.save_meta()
 
         end = time.time()
         self.cap.release()
@@ -200,7 +197,7 @@ class VideoStream(ABC):
         file = open(f'{self.video_path}/{self.input_file}_record.txt', mode)
 
         if mode == 'a':
-            file.write('\n' + '-' * 25 + '\n')
+            file.write('-' * 25 + '\n\n')
             file.write('after reconstruct:\n\n')
         else:
             file.write('-' * 25 + '\n')
@@ -235,26 +232,5 @@ class VideoStream(ABC):
                         file.write(f'\t({j + 1}) {face_name}: {face_cnt}次\n')
             else:
                 file.write(f'{i + 1}. {obj_name}: { obj_classes_cnt[obj_sort_label]}次\n')
-        file.write(f'\n總共花費{total_time}秒')
+        file.write(f'\n總共花費 {total_time} 秒')
         file.close()
-
-class VideoTypeInterface(ABC):
-    @abstractmethod
-    def setVideoType(self):
-        pass
-
-class Mp4VideoType(VideoTypeInterface):
-    def setVideoType(self):
-        self.fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-
-class AviVideoType(VideoTypeInterface):
-    def setVideoType(self):
-        self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
-
-class Mp4Video(VideoStream, Mp4VideoType):
-    def __init__(self, video_path, input_file, extension):
-        super().__init__(video_path, input_file, extension)
-
-class AviVideo(VideoStream, AviVideoType):
-    def __init__(self, video_path, input_file, extension):
-        super().__init__(video_path, input_file, extension)

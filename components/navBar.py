@@ -2,7 +2,7 @@ from dash import html
 import dash_bootstrap_components as dbc
 
 img_path = './assets/img'
-logo = f'{img_path}/logo.png'
+logo = f'{img_path}/uscc.png'
 
 navbar = dbc.Navbar(
     [
