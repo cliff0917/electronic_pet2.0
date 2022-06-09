@@ -23,7 +23,7 @@ class VideoStream(ABC):
         self.frame_num = self.cap.get(cv2.CAP_PROP_FRAME_COUNT)
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.alpha = 0.7
-        self.setVideoType()
+        self.setDecodeType()
         self.setOutputType()
 
     def setOutputType(self):

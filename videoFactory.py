@@ -7,15 +7,15 @@ def VideoFactoryInterface(video_path, input_file):
 
 class FactoryInterface(ABC):
     @abstractmethod
-    def setVideoType(self):
+    def setDecodeType(self):
         pass
 
 class Mp4VideoFactory(FactoryInterface):
-    def setVideoType(self):
+    def setDecodeType(self):
         self.fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
 class AviVideoFactory(FactoryInterface):
-    def setVideoType(self):
+    def setDecodeType(self):
         self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
 
 class Mp4Video(VideoStream, Mp4VideoFactory):
