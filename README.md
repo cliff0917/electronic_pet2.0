@@ -11,12 +11,12 @@ python worker.py & python app.py
 
 # 下載各個資料夾並放到 electronic_pet2.0/ 中
 data/：放 P-learning 之 dataset
-https://drive.google.com/file/d/1Z1IxsaHORZHOf6OEfCjwCvvWnI9B6LiH/view?usp=sharing
+https://drive.google.com/drive/folders/1H3XxMuVjJaLFQ1asAxrDWxPpV-fSV7Fh?usp=sharing
 
 model/：放 P-learning 產生之 encoder
 https://drive.google.com/file/d/1pfMH7rJZL1dAt7e2RO8DuhtUXnFv2grK/view?usp=sharing
 
-video_test/：放欲測試之video, 在此產生output檔
+video_test/：放欲測試之video, 在此產生 output 檔
 https://drive.google.com/file/d/1u9RHe6FnVcWjiLNImp0eTD7Vgwi5WnDN/view?usp=sharing
 
 yolo/：放訓練好的 yolo model
